@@ -70,9 +70,19 @@ gospec () {
     if [ $fail_count -gt 0 ]; then
         println
         println "Failing tests:"
-        println
 
-        get_tests_by_action "$output_tests" "fail" | jq -r 'sort_by(.Package) | .[].Test'
+        get_tests_by_action "$output_tests" "fail" | \
+            jq -c 'group_by(.Package) | .[]' | \
+            while read failed_package; do
+                package_name=$(echo "$failed_package" | jq -r '[.[].Package] | unique | .[0]')
+                println
+                println "$package_name"
+                echo "$failed_package" | \
+                    jq -r 'sort_by(.Test) | reverse | .[].Test' | \
+                    while read test_name; do
+                        println "\t$test_name";
+                    done
+                done
     fi
 }
 
