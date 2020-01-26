@@ -111,45 +111,81 @@ test_summary () {
 test_list_by_pkg () {
     local output="${1}"
     local action="${2}"
-    local output_required="${3}"
+    local print_output="${3}"
     get_by_action "$output" "$action" | \
-        for failed_package in $(jq -c 'group_by(.Package) | .[]'); do
+        for failed_package in $(jq -c 'group_by(.Package) | .[]');
+        do
             package_name=$(echo "$failed_package" | jq -r '[.[].Package] | unique | .[0]')
             println
             colorize "$package_name" "$BLUE"
             echo "$failed_package" | \
-                for test_name in $(jq -r 'sort_by(.Test) | reverse | .[].Test'); do
+                for test_name in $(jq -r 'sort_by(.Test) | reverse | .[].Test');
+                do
                     colorize "\t$test_name" "$RED"
 
-                    if [ -n "$output_required" ]; then
+                    if [ "$print_output" == "yes" ]; then
                         local action="output";
                         get_by_test_and_action "$output" "$test_name" "output" | \
                             jq -r '.[].Output | select(test("^\\s*(---|===) (SKIP|RUN|PAUSE|CONT|PASS|FAIL)") | not) | sub("\\n"; "")'
                     fi
-                    done
                 done
-            }
+            done
+        }
 
 # --- Main function
 
 gospec () {
-    cmd_go_test="go test -count=1 -v -json ./..."
+    local use_colors="yes"
+    local print_output="yes"
+    local print_help="no"
+    local package="./..."
+    local regex="."
+
+    if [ $# -eq 1 ];
+    then
+        case "${1}" in
+            ('-h' | '--help')
+                print_help="yes"
+        esac
+    fi
+
+    [ "$print_help" == "yes" ] && help && return 0
+
+    [ "${1}" == "-C" ] && use_colors="no" && shift
+    [ "${1}" == "-O" ] && print_output="no" && shift
+    [ -n "${1}" ] && package="${1}"
+    [ -n "${2}" ] && regex="${2}"
+    [ $# -eq 1 -a ! -d "$package" ] && regex="$package" && package="./..."
+
+    cmd_go_test="go test -json -v $package -run $regex"
     cmd_jq="jq -c --slurp ."
 
-    output=$($cmd_go_test | $cmd_jq)
+    echo $cmd_go_test >&2
+
+    output=$($cmd_go_test)
+    output=$(echo "$output" | $cmd_jq)
+
     output_tests=$(get_tests "$output")
     fail_count=$(count_action "$output" "fail")
 
-    initialize_colors
+    [ "$use_colors" == "yes" ] && initialize_colors
 
-    if [ $fail_count -gt 0 ]; then
+    if [ $fail_count -gt 0 ];
+    then
+        if [ "$print_output" == "yes" ];
+        then
+            println
+            colorize "Failing tests (output):" "$RED"
+            test_list_by_pkg "$output_tests" "fail" "yes"
+        fi
+
         println
-        colorize "Failing tests:" "$RED"
-        test_list_by_pkg "$output_tests" "fail" "yes"
+        colorize "Failing tests (summary):" "$RED"
+        test_list_by_pkg "$output_tests" "fail" "no"
     fi
 
     println
     test_summary "$output_tests"
 }
 
-gospec
+gospec $@
