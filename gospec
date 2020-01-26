@@ -26,6 +26,39 @@ colorize () {
     println "${color}$str${COLOR_RESET}"
 }
 
+help () {
+    cat <<EOF
+gospec v0.1.0
+
+gospec prettifies the output of \`go test\`
+
+Usage:
+    gospec [options] [package] [test-regex]
+
+Available options:
+    [--no-color |-C] => do not use colors when printing the summarized output
+    [--no-output|-O] => do not print output for failing tests, just the test name
+
+Examples:
+    # Run complete test suite, print failing tests and their output
+    gospec
+
+    # Run gospec without using colors in the output
+    gospec -C
+
+    # Print a list of failing test names and a summary
+    gospec -O
+
+    # Run tests matching Percent in the utils package
+    gospec ./utils Percent
+
+    # Run all tests that match the given regex
+    gospec "/Base"
+
+Webpage:
+    https://github.com/icyflame/gospec
+EOF
+}
 
 # --- JSON parsing related
 
