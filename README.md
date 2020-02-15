@@ -2,7 +2,7 @@
 
 > Bash function that prettifies the output of `go test`
 
-[![asciicast](https://asciinema.org/a/301630.svg)](https://asciinema.org/a/301630)
+[![asciicast](https://asciinema.org/a/301631.svg)](https://asciinema.org/a/301631)
 
 ## Usage
 
