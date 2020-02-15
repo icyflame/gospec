@@ -1,4 +1,4 @@
-# go-testing-tool _WIP_
+# gospec
 
 > Bash function that prettifies the output of `go test`
 
