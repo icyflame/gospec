@@ -36,9 +36,10 @@ Usage:
     gospec [options] [package] [test-regex]
 
 Available options:
-    [ passthru    | pt ] => run the Go test command, don't change anything in the output
     [ --no-color  | -C ] => do not use colors when printing the summarized output
-    [ --no-output | -O ] => do not print output for failing tests, just the test name
+    [ --no-output | -O ] => do not print output for failing tests
+    [ --summary   | -S ] => print a list of passing and failing tests
+    [ --passthru  | -P ] => Run the Go test command, don't change anything in the output
 
 Examples:
     # Run complete test suite and print failing test output + list of failing tests
@@ -49,6 +50,9 @@ Examples:
 
     # Run complete test suite and print only the list of failing tests
     gospec -O
+
+    # Run complete test suite and the list of passing and failing tests
+    gospec -O -S
 
     # Run tests matching Percent in the utils package
     gospec ./utils Percent
@@ -120,6 +124,7 @@ test_list_by_pkg () {
     local output="${1}"
     local action="${2}"
     local print_output="${3}"
+    local color="${4}"
     get_by_action "$output" "$action" | \
         for failed_package in $(jq -c 'group_by(.Package) | .[]');
         do
@@ -129,7 +134,7 @@ test_list_by_pkg () {
             echo "$failed_package" | \
                 for test_name in $(jq -r 'sort_by(.Test) | reverse | .[].Test');
                 do
-                    colorize "\t$test_name" "$RED"
+                    colorize "\t$test_name" "$color"
 
                     if [ "$print_output" == "yes" ]; then
                         local action="output";
@@ -145,6 +150,7 @@ test_list_by_pkg () {
 gospec () {
     local use_colors="yes"
     local print_output="yes"
+    local print_summary="no"
     local pass_thru="no"
     local package="./..."
     local regex="."
@@ -160,7 +166,7 @@ gospec () {
     fi
 
     case "${1}" in
-        ('pt' | 'passthru')
+        ('--passthru' | '-P')
             pass_thru="yes"
             json=""
             shift
@@ -175,6 +181,12 @@ gospec () {
     case "${1}" in
         ('--no-output' | '-O')
             print_output="no"
+            shift
+    esac
+
+    case "${1}" in
+        ('--summary' | '-S')
+            print_summary="yes"
             shift
     esac
 
@@ -207,12 +219,19 @@ gospec () {
         then
             println
             colorize "Failing tests (output):" "$RED"
-            test_list_by_pkg "$output_tests" "fail" "yes"
+            test_list_by_pkg "$output_tests" "fail" "yes" "$RED"
+        fi
+
+        if [ "$print_summary" == "yes" ];
+        then
+            println
+            colorize "Passing tests (summary):" "$GREEN"
+            test_list_by_pkg "$output_tests" "pass" "no" "$GREEN"
         fi
 
         println
         colorize "Failing tests (summary):" "$RED"
-        test_list_by_pkg "$output_tests" "fail" "no"
+        test_list_by_pkg "$output_tests" "fail" "no" "$RED"
     fi
 
     println
