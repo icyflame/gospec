@@ -137,31 +137,54 @@ test_list_by_pkg () {
 gospec () {
     local use_colors="yes"
     local print_output="yes"
-    local print_help="no"
+    local pass_thru="no"
     local package="./..."
     local regex="."
+    local json="-json"
 
     if [ $# -eq 1 ];
     then
         case "${1}" in
-            ('-h' | '--help')
-                print_help="yes"
+            ('-h' | '--help' | 'help')
+                help
+                return
         esac
     fi
 
-    [ "$print_help" == "yes" ] && help && return 0
+    case "${1}" in
+        ('pt' | 'passthru')
+            pass_thru="yes"
+            json=""
+            shift
+    esac
 
-    [ "${1}" == "-C" ] && use_colors="no" && shift
-    [ "${1}" == "-O" ] && print_output="no" && shift
+    case "${1}" in
+        ('--no-color' | '-C')
+            use_colors="no"
+            shift
+    esac
+
+    case "${1}" in
+        ('--no-output' | '-O')
+            print_output="no"
+            shift
+    esac
+
     [ -n "${1}" ] && package="${1}"
     [ -n "${2}" ] && regex="${2}"
     [ $# -eq 1 -a ! -d "$package" ] && regex="$package" && package="./..."
 
-    cmd_go_test="go test -json -v $package -run $regex"
-    cmd_jq="jq -c --slurp ."
+    cmd_go_test="go test $json -v $package -run $regex"
 
     echo $cmd_go_test >&2
 
+    if [[ "$pass_thru" == "yes" ]];
+    then
+        $cmd_go_test
+        return
+    fi
+
+    cmd_jq="jq -c --slurp ."
     output=$($cmd_go_test)
     output=$(echo "$output" | $cmd_jq)
 
