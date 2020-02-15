@@ -83,10 +83,10 @@ prints the list of failing tests at the end.
 
 I have two requirements from any testing tool:
 
-- **Run a subset of all tests quickly:** I use when I am writing a new test or
-  editing code that will affect an existing test.
-- **Ensure that the test suite is passing before `git push`:** I use this while
-  I am making changes that were requested in a review.
+- **Run a subset of all tests quickly:** I use this when I am writing a new test
+  or editing code that will affect an existing test.
+- **Ensure that the test suite is passing before `git push`:** I use this when I
+  am making changes that were requested in a review.
 
 Gospec is opinionated. It doesn't print passing tests unless you use the
 `--summary` option. It prints the output of failing tests by default. The bash
