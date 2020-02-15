@@ -1,6 +1,6 @@
 # gospec
 
-> Bash function that prettifies the output of `go test`
+> A bash function that prettifies the output of `go test`
 
 [![asciicast](https://asciinema.org/a/301631.svg)](https://asciinema.org/a/301631)
 
