@@ -28,7 +28,7 @@ colorize () {
 
 help () {
     cat <<EOF
-gospec v0.1.0
+gospec
 
 gospec prettifies the output of \`go test\`
 
@@ -36,17 +36,18 @@ Usage:
     gospec [options] [package] [test-regex]
 
 Available options:
-    [--no-color |-C] => do not use colors when printing the summarized output
-    [--no-output|-O] => do not print output for failing tests, just the test name
+    [ passthru    | pt ] => run the Go test command, don't change anything in the output
+    [ --no-color  | -C ] => do not use colors when printing the summarized output
+    [ --no-output | -O ] => do not print output for failing tests, just the test name
 
 Examples:
-    # Run complete test suite, print failing tests and their output
+    # Run complete test suite and print failing test output + list of failing tests
     gospec
 
-    # Run gospec without using colors in the output
+    # Same as above: Don't use colors in the output
     gospec -C
 
-    # Print a list of failing test names and a summary
+    # Run complete test suite and print only the list of failing tests
     gospec -O
 
     # Run tests matching Percent in the utils package
@@ -54,6 +55,13 @@ Examples:
 
     # Run all tests that match the given regex
     gospec "/Base"
+
+    # Pass through to the underlying go test command: Don't mangle \`go test\`'s output
+    gospec pt
+
+    # Pass through to the underlying go test command: Run tests in this package that match the given
+    # regex
+    gospec pt ./package regex
 
 Webpage:
     https://github.com/icyflame/gospec
