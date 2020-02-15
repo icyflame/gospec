@@ -56,13 +56,15 @@ Webpage:
 
 **Note:** `gospec` requires [`jq`][1] as a pre-requisite.
 
-`gospec` is a bash function. You can use it by placing the file in your path. I
-recommend placing it in `$HOME/bin` and adding `$HOME/bin` to your path. You can
-place it in any folder that is listed in your `$PATH` variable.
+`gospec` is a bash function. You can use it by placing the file in your path and
+making it an executable. I recommend placing it in `$HOME/bin` and adding
+`$HOME/bin` to your path. You can place it in any folder that is listed in your
+`$PATH` variable.
 
 ```sh
 # Download the gospec bash function into a file in this directory
 curl "https://raw.githubusercontent.com/icyflame/gospec/master/gospec" > "$HOME/bin/gospec"
+chmod +x "$HOME/bin/gospec"
 
 # Restart your termianl or source your bashrc/zshrc and check that gospec can
 # now be called
