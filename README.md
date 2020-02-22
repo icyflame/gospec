@@ -40,13 +40,12 @@ Examples:
     # Run all tests that match the given regex
     gospec "/Base"
 
-    # Pass through to the underlying go test command: Don't mangle `go test`'s
-    # output
-    gospec pt
+    # Pass through to the underlying go test command: Don't mangle `go test`'s output
+    gospec -P
 
-    # Pass through to the underlying go test command: Run tests in this package
-    # that match the given regex
-    gospec pt ./package regex
+    # Pass through to the underlying go test command: Run tests in this package that match the given
+    # regex
+    gospec -P ./package regex
 
 Webpage:
     https://github.com/icyflame/gospec
@@ -92,6 +91,12 @@ Gospec is opinionated. It doesn't print passing tests unless you use the
 `--summary` option. It prints the output of failing tests by default. The bash
 function is fairly small and simple, so my assumption is that anyone who wants a
 different set of defaults will simply edit the bash function.
+
+## Limitations
+
+- Argument parsing in `gospec` is naive and works only if you pass them in the
+  pre-defined order: `gospec [-h|-P] -C -O -S [package] regex`. I intend to fix
+  this in a future release.
 
 ## License
 
