@@ -61,11 +61,11 @@ Examples:
     gospec "/Base"
 
     # Pass through to the underlying go test command: Don't mangle \`go test\`'s output
-    gospec pt
+    gospec -P
 
     # Pass through to the underlying go test command: Run tests in this package that match the given
     # regex
-    gospec pt ./package regex
+    gospec -P ./package regex
 
 Webpage:
     https://github.com/icyflame/gospec
@@ -209,9 +209,21 @@ gospec () {
     output=$(echo "$output" | $cmd_jq)
 
     output_tests=$(get_tests "$output")
+
+    pass_count=$(count_action "$output" "pass")
     fail_count=$(count_action "$output" "fail")
 
     [ "$use_colors" == "yes" ] && initialize_colors
+
+    if [ $pass_count -gt 0 ];
+    then
+        if [ "$print_summary" == "yes" ];
+        then
+            println
+            colorize "Passing tests (summary):" "$GREEN"
+            test_list_by_pkg "$output_tests" "pass" "no" "$GREEN"
+        fi
+    fi
 
     if [ $fail_count -gt 0 ];
     then
@@ -220,13 +232,6 @@ gospec () {
             println
             colorize "Failing tests (output):" "$RED"
             test_list_by_pkg "$output_tests" "fail" "yes" "$RED"
-        fi
-
-        if [ "$print_summary" == "yes" ];
-        then
-            println
-            colorize "Passing tests (summary):" "$GREEN"
-            test_list_by_pkg "$output_tests" "pass" "no" "$GREEN"
         fi
 
         println
