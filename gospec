@@ -36,14 +36,18 @@ Usage:
     gospec [options] [package] [test-regex]
 
 Available options:
-    [ --no-color  | -C ] => do not use colors when printing the summarized output
-    [ --no-output | -O ] => do not print output for failing tests
-    [ --summary   | -S ] => print a list of passing and failing tests
-    [ --passthru  | -P ] => Run the Go test command, don't change anything in the output
+    [ --use-executable | -E executable ] => Use the given executable as the Go command
+    [ --no-color       | -C ] => do not use colors when printing the summarized output
+    [ --no-output      | -O ] => do not print output for failing tests
+    [ --summary        | -S ] => print a list of passing and failing tests
+    [ --passthru       | -P ] => Run the Go test command, don't change anything in the output
 
 Examples:
     # Run complete test suite and print failing test output + list of failing tests
     gospec
+
+    # Run the complete test suite using Go 1.13.8
+    gospec -E go1.13.8
 
     # Same as above: Don't use colors in the output
     gospec -C
@@ -165,6 +169,15 @@ gospec () {
         esac
     fi
 
+    go="go"
+
+    case "${1}" in
+        ('--use-executable' | '-E')
+            go="${2:-go}"
+            shift
+            shift
+    esac
+
     case "${1}" in
         ('--passthru' | '-P')
             pass_thru="yes"
@@ -194,7 +207,7 @@ gospec () {
     [ -n "${2}" ] && regex="${2}"
     [ $# -eq 1 -a ! -d "$package" ] && regex="$package" && package="./..."
 
-    cmd_go_test="go test $json -v $package -run $regex"
+    cmd_go_test="$go test $json -v $package -run $regex"
 
     echo $cmd_go_test >&2
 
